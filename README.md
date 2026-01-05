@@ -118,15 +118,22 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Step 2: Download Dataset
+### Step 2: Add Your Images
 
-```bash
-# Download Food-101 from Kaggle (100 random images)
-python download_dataset.py --num-images 100
+Place your images in the `data/food-101-subset/` folder:
 
-# Or specify a different number
-python download_dataset.py --num-images 200
 ```
+data/
+└── food-101-subset/
+    ├── category1/
+    │   ├── image1.jpg
+    │   └── image2.jpg
+    ├── category2/
+    │   └── ...
+    └── ...
+```
+
+Supported formats: `.jpg`, `.jpeg`, `.png`, `.bmp`, `.tiff`, `.webp`
 
 ### Step 3: Run Benchmark
 
@@ -191,11 +198,13 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### Step 4: Download Dataset on VM
+#### Step 4: Add Images on VM
+
+Upload your images to `data/food-101-subset/` or use `scp` to copy from local:
 
 ```bash
-# Download Food-101 dataset (100 images)
-python download_dataset.py --num-images 100
+# From your LOCAL machine, copy images to VM
+gcloud compute scp --recurse ./your-images/* image-processor:~/cst435-assignment2/data/food-101-subset/
 ```
 
 #### Step 5: Run Benchmark on VM
@@ -250,8 +259,11 @@ cd cst435-assignment2
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
-# 4. Download dataset and run benchmark (on VM)
-python download_dataset.py --num-images 100
+# 4. Copy images and run benchmark
+# (From LOCAL machine, upload your images first)
+# gcloud compute scp --recurse ./your-images/* image-processor:~/cst435-assignment2/data/food-101-subset/ --zone=us-central1-a
+
+# Then on VM, run benchmark
 python benchmark.py data/food-101-subset --limit 100 -p 1 2 4 8
 
 # 5. Exit VM
@@ -278,8 +290,8 @@ git clone https://github.com/danishayman/cst435-assignment2.git
 cd cst435-assignment2
 pip install -r requirements.txt
 
-# 3. Download dataset (smaller subset for Cloud Shell)
-python download_dataset.py --num-images 50
+# 3. Add your images to data/food-101-subset/ folder
+# You can upload via Cloud Shell's upload feature (three dots menu → Upload)
 
 # 4. Run benchmark (Cloud Shell has 2 vCPUs)
 python benchmark.py data/food-101-subset --limit 50 -p 1 2
@@ -292,33 +304,22 @@ python benchmark.py data/food-101-subset --limit 50 -p 1 2
 
 ## Dataset Setup
 
-### Automatic Download (Recommended)
-
-```bash
-# Download 100 random images from Food-101
-python download_dataset.py --num-images 100
-
-# Download 200 images
-python download_dataset.py -n 200
-
-# Clear existing and re-download
-python download_dataset.py --clear -n 100
-```
-
-### Manual Setup
-
-Download Food-101 from [Kaggle](https://www.kaggle.com/datasets/dansbecker/food-101) and extract to:
+Place your images in the `data/food-101-subset/` folder. You can organize them in subfolders by category:
 
 ```
 data/
 └── food-101-subset/
-    ├── apple_pie/
+    ├── category1/
     │   ├── image1.jpg
     │   └── image2.jpg
-    ├── pizza/
+    ├── category2/
     │   └── ...
     └── ...
 ```
+
+**Supported formats:** `.jpg`, `.jpeg`, `.png`, `.bmp`, `.tiff`, `.webp`
+
+**Note:** The pipeline scans recursively, so images can be in nested folders.
 
 ---
 
@@ -478,7 +479,6 @@ cst435-assignment2/
 ├── futures_version.py         # concurrent.futures implementation
 ├── benchmark.py               # Benchmarking and metrics
 ├── utils.py                   # I/O utility functions
-├── download_dataset.py        # Kaggle dataset downloader
 ├── run_demo.py                # Demo with synthetic images
 │
 ├── requirements.txt           # Python dependencies
@@ -516,7 +516,6 @@ cst435-assignment2/
 | "No images found" | Check input directory path and image formats |
 | Memory errors | Reduce `--limit` or use smaller images |
 | Slow on Windows | Normal - process creation is slower on Windows |
-| `kagglehub` auth error | Run `kaggle` CLI once to authenticate |
 
 ### Windows-Specific
 
