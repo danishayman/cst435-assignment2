@@ -180,7 +180,7 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install python3-pip python3-venv git -y
 
 # Clone your repository (or upload files)
-git clone https://github.com/YOUR_USERNAME/cst435-assignment2.git
+git clone https://github.com/danishayman/cst435-assignment2.git
 cd cst435-assignment2
 
 # Create virtual environment
@@ -245,7 +245,7 @@ gcloud compute ssh image-processor --zone=us-central1-a
 
 # 3. Run setup commands (on VM)
 sudo apt update && sudo apt install python3-pip python3-venv git -y
-git clone https://github.com/YOUR_USERNAME/cst435-assignment2.git
+git clone https://github.com/danishayman/cst435-assignment2.git
 cd cst435-assignment2
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
@@ -274,7 +274,7 @@ Cloud Shell is free and requires no VM setup:
 # 1. Open Cloud Shell from Google Cloud Console (click the terminal icon)
 
 # 2. Clone and setup
-git clone https://github.com/YOUR_USERNAME/cst435-assignment2.git
+git clone https://github.com/danishayman/cst435-assignment2.git
 cd cst435-assignment2
 pip install -r requirements.txt
 
