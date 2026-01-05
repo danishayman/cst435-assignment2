@@ -118,33 +118,22 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Step 2: Add Your Images
-
-Place your images in the `data/food-101-subset/` folder:
-
-```
-data/
-└── food-101-subset/
-    ├── category1/
-    │   ├── image1.jpg
-    │   └── image2.jpg
-    ├── category2/
-    │   └── ...
-    └── ...
-```
-
-Supported formats: `.jpg`, `.jpeg`, `.png`, `.bmp`, `.tiff`, `.webp`
-
-### Step 3: Run Benchmark
+### Step 2: Run Demo or Benchmark
 
 ```bash
-# Run full benchmark with 1, 2, 4 processes
-python benchmark.py data/food-101-subset --limit 100 -p 1 2 4
+# Option 1: Run demo (quick test with 100 images)
+python run_demo.py
 
-# Results will be saved to benchmark_output/benchmark_results.csv
+# Option 2: Run demo with custom image count
+python run_demo.py --images 1000
+
+# Option 3: Run full benchmark with custom options
+python benchmark.py data/food-101-subset --limit 1000 -p 1 2 4
+
+# Results will be saved to output/benchmark_results.csv
 ```
 
-### Step 4: View Results
+### Step 3: View Results
 
 - Check console output for speedup and efficiency metrics
 - Open `benchmark_output/benchmark_results.csv` for raw data
@@ -196,64 +185,22 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Step 4: Add Images on VM
-
-Upload your images to `data/food-101-subset/` or use `scp` to copy from local:
+### Step 4: Run Benchmark on VM
 
 ```bash
-# From your LOCAL machine, copy images to VM
-gcloud compute scp --recurse ./your-images/* image-processor:~/cst435-assignment2/data/food-101-subset/
+# Run demo with all 2000 images
+python run_demo.py
+
+# Or run benchmark with custom options
+python benchmark.py data/food-101-subset --limit 2000 -p 1 2 4 8
 ```
 
-### Step 5: Run Benchmark on VM
-
-```bash
-# Run benchmark with multiple process counts
-python benchmark.py data/food-101-subset --limit 100 -p 1 2 4 8
-
-# For 8-vCPU VM, test up to 8 processes
-python benchmark.py data/food-101-subset --limit 200 -p 1 2 4 8
-```
-
-### Step 6: Download Results
+### Step 5: Download Results
 
 ```bash
 # View results on VM
-cat benchmark_output/benchmark_results.csv
-
-# Or copy to local machine using gcloud (run on LOCAL machine)
-gcloud compute scp image-processor:~/cst435-assignment2/benchmark_output/benchmark_results.csv ./results.csv
+cat output/benchmark_results.csv
 ```
-
-### Step 7: Clean Up (Important!)
-
-```bash
-# Delete VM to stop billing (run on LOCAL machine or Cloud Console)
-gcloud compute instances delete image-processor
-```
-
----
-
-## Dataset Setup
-
-Place your images in the `data/food-101-subset/` folder. You can organize them in subfolders by category:
-
-```
-data/
-└── food-101-subset/
-    ├── category1/
-    │   ├── image1.jpg
-    │   └── image2.jpg
-    ├── category2/
-    │   └── ...
-    └── ...
-```
-
-**Supported formats:** `.jpg`, `.jpeg`, `.png`, `.bmp`, `.tiff`, `.webp`
-
-**Note:** The pipeline scans recursively, so images can be in nested folders.
-
----
 
 ## Usage
 
@@ -411,7 +358,8 @@ cst435-assignment2/
 ├── futures_version.py         # concurrent.futures implementation
 ├── benchmark.py               # Benchmarking and metrics
 ├── utils.py                   # I/O utility functions
-├── run_demo.py                # Demo with synthetic images
+├── run_demo.py                # Demo using food-101-subset images
+├── select_random_images.py    # Script to select random images from Food-101
 │
 ├── requirements.txt           # Python dependencies
 ├── README.md                  # This file
@@ -437,37 +385,4 @@ cst435-assignment2/
 | **Error Handling** | Manual | Via `Future.result()` |
 | **Use Case** | Fine control needed | Simpler interface |
 
----
 
-## Troubleshooting
-
-### Common Issues
-
-| Issue | Solution |
-|-------|----------|
-| "No images found" | Check input directory path and image formats |
-| Memory errors | Reduce `--limit` or use smaller images |
-| Slow on Windows | Normal - process creation is slower on Windows |
-
-### Windows-Specific
-
-On Windows, always use `if __name__ == "__main__":` guard:
-
-```python
-if __name__ == "__main__":
-    # Your code here
-```
-
-This is required for `multiprocessing` to work correctly on Windows.
-
-### GCP-Specific
-
-- **Billing**: Always delete VMs after use to avoid charges
-- **Quotas**: Check CPU quotas if VM creation fails
-- **Firewall**: No special firewall rules needed for this project
-
----
-
-## License
-
-Academic use only - CST435 Assignment 2
