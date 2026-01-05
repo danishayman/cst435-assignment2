@@ -65,19 +65,16 @@ def select_and_copy_images(source_dir, dest_dir, num_images=2000, seed=42):
             category = Path(img_path).parent.name
             filename = Path(img_path).name
         
-        # Create category subfolder in destination
-        category_dest = os.path.join(dest_dir, category)
-        os.makedirs(category_dest, exist_ok=True)
-        
-        # Copy file
-        dest_path = os.path.join(category_dest, filename)
+        # Create unique filename with category prefix to avoid duplicates
+        new_filename = f"{category}_{filename}"
+        dest_path = os.path.join(dest_dir, new_filename)
         
         # Handle duplicate filenames by adding a suffix
         if os.path.exists(dest_path):
-            base, ext = os.path.splitext(filename)
+            base, ext = os.path.splitext(new_filename)
             counter = 1
             while os.path.exists(dest_path):
-                dest_path = os.path.join(category_dest, f"{base}_{counter}{ext}")
+                dest_path = os.path.join(dest_dir, f"{base}_{counter}{ext}")
                 counter += 1
         
         shutil.copy2(img_path, dest_path)
