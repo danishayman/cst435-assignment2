@@ -157,11 +157,9 @@ python benchmark.py data/food-101-subset --limit 100 -p 1 2 4
 ### Prerequisites
 
 - Google Cloud account with billing enabled
-- `gcloud` CLI installed locally (or use Cloud Shell)
+- `gcloud` CLI installed locally
 
-### Option 1: Using Google Cloud Console + SSH
-
-#### Step 1: Create a VM Instance
+### Step 1: Create a VM Instance
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Navigate to **Compute Engine** → **VM instances**
@@ -173,11 +171,11 @@ python benchmark.py data/food-101-subset --limit 100 -p 1 2 4
    - **Boot disk**: Ubuntu 22.04 LTS, 20GB
 5. Click **Create**
 
-#### Step 2: SSH into VM
+### Step 2: SSH into VM
 
 Click the **SSH** button next to your VM instance in the console.
 
-#### Step 3: Setup Environment on VM
+### Step 3: Setup Environment on VM
 
 ```bash
 # Update system packages
@@ -198,7 +196,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### Step 4: Add Images on VM
+### Step 4: Add Images on VM
 
 Upload your images to `data/food-101-subset/` or use `scp` to copy from local:
 
@@ -207,7 +205,7 @@ Upload your images to `data/food-101-subset/` or use `scp` to copy from local:
 gcloud compute scp --recurse ./your-images/* image-processor:~/cst435-assignment2/data/food-101-subset/
 ```
 
-#### Step 5: Run Benchmark on VM
+### Step 5: Run Benchmark on VM
 
 ```bash
 # Run benchmark with multiple process counts
@@ -217,7 +215,7 @@ python benchmark.py data/food-101-subset --limit 100 -p 1 2 4 8
 python benchmark.py data/food-101-subset --limit 200 -p 1 2 4 8
 ```
 
-#### Step 6: Download Results
+### Step 6: Download Results
 
 ```bash
 # View results on VM
@@ -227,77 +225,11 @@ cat benchmark_output/benchmark_results.csv
 gcloud compute scp image-processor:~/cst435-assignment2/benchmark_output/benchmark_results.csv ./results.csv
 ```
 
-#### Step 7: Clean Up (Important!)
+### Step 7: Clean Up (Important!)
 
 ```bash
 # Delete VM to stop billing (run on LOCAL machine or Cloud Console)
 gcloud compute instances delete image-processor
-```
-
----
-
-### Option 2: Using gcloud CLI (Command Line)
-
-Run these commands from your **local terminal**:
-
-```bash
-# 1. Create VM with 8 vCPUs
-gcloud compute instances create image-processor \
-    --machine-type=e2-standard-8 \
-    --image-family=ubuntu-2204-lts \
-    --image-project=ubuntu-os-cloud \
-    --boot-disk-size=20GB \
-    --zone=us-central1-a
-
-# 2. SSH into VM
-gcloud compute ssh image-processor --zone=us-central1-a
-
-# 3. Run setup commands (on VM)
-sudo apt update && sudo apt install python3-pip python3-venv git -y
-git clone https://github.com/danishayman/cst435-assignment2.git
-cd cst435-assignment2
-python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-
-# 4. Copy images and run benchmark
-# (From LOCAL machine, upload your images first)
-# gcloud compute scp --recurse ./your-images/* image-processor:~/cst435-assignment2/data/food-101-subset/ --zone=us-central1-a
-
-# Then on VM, run benchmark
-python benchmark.py data/food-101-subset --limit 100 -p 1 2 4 8
-
-# 5. Exit VM
-exit
-
-# 6. Copy results to local machine
-gcloud compute scp image-processor:~/cst435-assignment2/benchmark_output/benchmark_results.csv ./gcp_results.csv --zone=us-central1-a
-
-# 7. DELETE VM to stop charges!
-gcloud compute instances delete image-processor --zone=us-central1-a
-```
-
----
-
-### Option 3: Using Cloud Shell (Quick Test)
-
-Cloud Shell is free and requires no VM setup:
-
-```bash
-# 1. Open Cloud Shell from Google Cloud Console (click the terminal icon)
-
-# 2. Clone and setup
-git clone https://github.com/danishayman/cst435-assignment2.git
-cd cst435-assignment2
-pip install -r requirements.txt
-
-# 3. Add your images to data/food-101-subset/ folder
-# You can upload via Cloud Shell's upload feature (three dots menu → Upload)
-
-# 4. Run benchmark (Cloud Shell has 2 vCPUs)
-python benchmark.py data/food-101-subset --limit 50 -p 1 2
-
-# 5. Download results using Cloud Shell's download feature
-# Click the three dots menu → Download → Enter path: benchmark_output/benchmark_results.csv
 ```
 
 ---
