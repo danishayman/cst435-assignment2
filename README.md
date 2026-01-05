@@ -16,7 +16,6 @@ A parallel image processing pipeline using the Food-101 dataset, implemented wit
 - [Benchmarking](#benchmarking)
 - [Performance Metrics](#performance-metrics)
 - [Project Structure](#project-structure)
-- [Troubleshooting](#troubleshooting)
 
 ## Overview
 
