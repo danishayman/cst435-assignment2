@@ -115,7 +115,15 @@ source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Install OpenGL system libraries (required for OpenCV)
+sudo apt-get update && sudo apt-get install -y libgl1-mesa-glx libglib2.0-0
 ```
+
+> **Note**: On Linux systems, OpenCV requires OpenGL libraries. If you encounter `ImportError: libGL.so.1: cannot open shared object file`, run:
+> ```bash
+> sudo apt-get update && sudo apt-get install -y libgl1-mesa-glx libglib2.0-0
+> ```
 
 ### Step 2: Run Demo or Benchmark
 
@@ -182,6 +190,9 @@ source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Install OpenGL system libraries (required for OpenCV)
+sudo apt-get update && sudo apt-get install -y libgl1-mesa-glx libglib2.0-0
 ```
 
 ### Step 4: Run Benchmark on VM
