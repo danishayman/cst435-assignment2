@@ -22,7 +22,6 @@ from filters.gaussian_blur import gaussian_blur
 from filters.edge_detection import edge_detection
 from filters.sharpen import sharpen
 from filters.brightness import adjust_brightness
-from filters.convolution import convolve2d
 from filters.pipeline import apply_all_filters
 
 # Define public API
@@ -32,6 +31,5 @@ __all__ = [
     'edge_detection',
     'sharpen',
     'adjust_brightness',
-    'convolve2d',
     'apply_all_filters'
 ]

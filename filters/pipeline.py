@@ -1,7 +1,7 @@
 """
 pipeline.py - Complete Filter Pipeline
 
-Applies all 5 filters in sequence to an image.
+Applies all 5 filters in sequence to an image using OpenCV.
 """
 
 import numpy as np

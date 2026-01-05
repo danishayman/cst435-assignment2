@@ -1,18 +1,19 @@
 """
 grayscale.py - Grayscale Conversion Filter
 
-Converts RGB images to grayscale using the luminance formula.
+Converts RGB images to grayscale using OpenCV.
 
 """
 
+import cv2
 import numpy as np
 
 
 def grayscale(image: np.ndarray) -> np.ndarray:
     """
-    Convert an RGB image to grayscale using the luminance formula.
+    Convert an RGB image to grayscale using OpenCV.
     
-    Formula: Y = 0.299*R + 0.587*G + 0.114*B
+    Uses the standard luminance formula: Y = 0.299*R + 0.587*G + 0.114*B
     
     This formula is based on human perception of brightness, where green
     contributes most to perceived luminance, followed by red, then blue.
@@ -48,12 +49,8 @@ def grayscale(image: np.ndarray) -> np.ndarray:
     if image.shape[2] == 4:
         image = image[:, :, :3]
     
-    # Apply luminance formula using vectorized operations
-    # Coefficients: R=0.299, G=0.587, B=0.114
-    # These sum to 1.0 to preserve overall brightness
-    gray = (0.299 * image[:, :, 0] + 
-            0.587 * image[:, :, 1] + 
-            0.114 * image[:, :, 2])
+    # Use OpenCV for grayscale conversion (expects RGB input)
+    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     
     return gray.astype(np.uint8)
 

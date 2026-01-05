@@ -1,31 +1,20 @@
 """
 gaussian_blur.py - Gaussian Blur Filter
 
-Applies Gaussian blur using a 3x3 kernel for noise reduction.
+Applies Gaussian blur using OpenCV for noise reduction.
 """
 
+import cv2
 import numpy as np
-from filters.convolution import convolve2d
 
 
 def gaussian_blur(image: np.ndarray) -> np.ndarray:
     """
-    Apply Gaussian blur using a 3x3 kernel.
+    Apply Gaussian blur using OpenCV's GaussianBlur function.
     
-    Kernel (normalized):
-        [1, 2, 1]
-        [2, 4, 2]  * (1/16)
-        [1, 2, 1]
-    
-    This kernel approximates a Gaussian distribution with sigma ≈ 0.85.
-    It provides smoothing that reduces noise while preserving edges
+    Uses a 3x3 kernel with sigma calculated automatically by OpenCV.
+    This provides smoothing that reduces noise while preserving edges
     better than a simple box blur.
-    
-    The kernel weights:
-        - Center (4): Highest weight for the pixel itself
-        - Adjacent (2): Medium weight for immediate neighbors
-        - Diagonal (1): Lowest weight for corner neighbors
-        - Sum = 16, so we divide by 16 to normalize
     
     Args:
         image: Input grayscale image as numpy array with shape (H, W)
@@ -36,8 +25,8 @@ def gaussian_blur(image: np.ndarray) -> np.ndarray:
         Values in range [0, 255] as uint8
     
     Notes:
-        - Uses zero-padding at boundaries
-        - For stronger blur, apply multiple times or use larger kernel
+        - Uses border replication at boundaries
+        - For stronger blur, increase kernel size or sigma
     
     Example:
         >>> img = np.array([[100, 100, 100],
@@ -47,15 +36,11 @@ def gaussian_blur(image: np.ndarray) -> np.ndarray:
         >>> blurred[1, 1]  # Center pixel gets smoothed
         131
     """
-    # Define the 3x3 Gaussian kernel (hardcoded, no magic)
-    # Values derived from discrete approximation of Gaussian function
-    kernel = np.array([
-        [1, 2, 1],
-        [2, 4, 2],
-        [1, 2, 1]
-    ], dtype=np.float64) / 16.0  # Normalize: sum = 16
+    # Use OpenCV's GaussianBlur with 3x3 kernel
+    # sigmaX=0 means sigma is calculated from kernel size
+    blurred = cv2.GaussianBlur(image, (3, 3), sigmaX=0)
     
-    return convolve2d(image, kernel)
+    return blurred.astype(np.uint8)
 
 
 # =============================================================================

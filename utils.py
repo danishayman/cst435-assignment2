@@ -16,8 +16,8 @@ import os
 from pathlib import Path
 from typing import List, Tuple, Optional
 
+import cv2
 import numpy as np
-from PIL import Image
 
 
 # Supported image extensions
@@ -98,14 +98,16 @@ def load_image(image_path: str) -> np.ndarray:
         raise FileNotFoundError(f"Image file not found: {image_path}")
     
     try:
-        # Open with Pillow and convert to RGB
-        with Image.open(image_path) as img:
-            # Convert to RGB if not already (handles grayscale, RGBA, etc.)
-            if img.mode != 'RGB':
-                img = img.convert('RGB')
-            
-            # Convert to NumPy array
-            return np.array(img, dtype=np.uint8)
+        # Read image using OpenCV (returns BGR format)
+        img = cv2.imread(image_path, cv2.IMREAD_COLOR)
+        
+        if img is None:
+            raise IOError(f"Failed to load image {image_path}")
+        
+        # Convert BGR to RGB for consistency
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        
+        return img.astype(np.uint8)
     
     except Exception as e:
         raise IOError(f"Failed to load image {image_path}: {e}")
@@ -132,19 +134,16 @@ def save_image(image: np.ndarray, output_path: str) -> None:
         ensure_directory(output_dir)
     
     try:
-        # Determine image mode based on array shape
-        if len(image.shape) == 2:
-            mode = 'L'  # Grayscale
-        elif image.shape[2] == 3:
-            mode = 'RGB'
-        elif image.shape[2] == 4:
-            mode = 'RGBA'
+        # Convert to BGR if RGB (OpenCV uses BGR)
+        if len(image.shape) == 3 and image.shape[2] == 3:
+            image_to_save = cv2.cvtColor(image.astype(np.uint8), cv2.COLOR_RGB2BGR)
         else:
-            raise ValueError(f"Unsupported image shape: {image.shape}")
+            image_to_save = image.astype(np.uint8)
         
-        # Create PIL Image and save
-        pil_image = Image.fromarray(image.astype(np.uint8), mode=mode)
-        pil_image.save(output_path)
+        # Save using OpenCV
+        success = cv2.imwrite(output_path, image_to_save)
+        if not success:
+            raise IOError(f"cv2.imwrite failed for {output_path}")
     
     except Exception as e:
         raise IOError(f"Failed to save image to {output_path}: {e}")

@@ -1,16 +1,16 @@
 """
 sharpen.py - Image Sharpening Filter
 
-Enhances edges and details using a sharpening kernel.
+Enhances edges and details using OpenCV's filter2D with a sharpening kernel.
 """
 
+import cv2
 import numpy as np
-from filters.convolution import convolve2d
 
 
 def sharpen(image: np.ndarray) -> np.ndarray:
     """
-    Sharpen the image using a sharpening kernel.
+    Sharpen the image using OpenCV's filter2D with a sharpening kernel.
     
     Sharpening Kernel:
         [ 0, -1,  0]
@@ -49,16 +49,19 @@ def sharpen(image: np.ndarray) -> np.ndarray:
         >>> sharp = sharpen(img)
         >>> # Transitions become more pronounced
     """
-    # Define sharpening kernel (hardcoded)
+    # Define sharpening kernel
     # This kernel is derived from the Laplacian operator
     # combined with the original image
     kernel = np.array([
         [ 0, -1,  0],
         [-1,  5, -1],
         [ 0, -1,  0]
-    ], dtype=np.float64)
+    ], dtype=np.float32)
     
-    return convolve2d(image, kernel)
+    # Use OpenCV's filter2D for convolution
+    sharpened = cv2.filter2D(image, -1, kernel)
+    
+    return sharpened.astype(np.uint8)
 
 
 # =============================================================================

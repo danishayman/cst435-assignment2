@@ -1,15 +1,16 @@
 """
 brightness.py - Brightness Adjustment Filter
 
-Adjusts image brightness by adding a scalar value to all pixels.
+Adjusts image brightness using OpenCV's convertScaleAbs.
 """
 
+import cv2
 import numpy as np
 
 
 def adjust_brightness(image: np.ndarray, value: int = 30) -> np.ndarray:
     """
-    Adjust image brightness by adding a scalar value.
+    Adjust image brightness using OpenCV.
     
     Formula: Output = clip(Input + value, 0, 255)
     
@@ -50,14 +51,11 @@ def adjust_brightness(image: np.ndarray, value: int = 30) -> np.ndarray:
         >>> dark[1, 0]  # 200 - 50 = 150
         150
     """
-    # Convert to float to prevent overflow during addition
-    adjusted = image.astype(np.float64) + value
+    # Use OpenCV's convertScaleAbs for brightness adjustment
+    # alpha=1 (no contrast change), beta=value (brightness offset)
+    adjusted = cv2.convertScaleAbs(image, alpha=1.0, beta=value)
     
-    # Clip values to valid range [0, 255]
-    # This prevents overflow (>255) and underflow (<0)
-    adjusted = np.clip(adjusted, 0, 255)
-    
-    return adjusted.astype(np.uint8)
+    return adjusted
 
 
 # =============================================================================

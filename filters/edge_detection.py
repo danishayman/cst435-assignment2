@@ -1,17 +1,17 @@
 """
 edge_detection.py - Sobel Edge Detection Filter
 
-Detects edges using the Sobel operator for gradient calculation.
+Detects edges using OpenCV's Sobel operator for gradient calculation.
 
 """
 
+import cv2
 import numpy as np
-from filters.convolution import convolve2d
 
 
 def edge_detection(image: np.ndarray) -> np.ndarray:
     """
-    Detect edges using the Sobel operator.
+    Detect edges using OpenCV's Sobel operator.
     
     Sobel kernels:
         Gx (horizontal gradient):     Gy (vertical gradient):
@@ -52,27 +52,13 @@ def edge_detection(image: np.ndarray) -> np.ndarray:
         >>> edges[1, 1] > edges[1, 0]  # Edge detected at transition
         True
     """
-    # Define Sobel kernels (hardcoded)
-    # Gx: Detects vertical edges (horizontal gradient)
-    sobel_x = np.array([
-        [-1, 0, 1],
-        [-2, 0, 2],
-        [-1, 0, 1]
-    ], dtype=np.float64)
-    
-    # Gy: Detects horizontal edges (vertical gradient)
-    sobel_y = np.array([
-        [-1, -2, -1],
-        [ 0,  0,  0],
-        [ 1,  2,  1]
-    ], dtype=np.float64)
-    
-    # Compute gradients (don't normalize yet - need float values)
-    gx = convolve2d(image, sobel_x, normalize=False)
-    gy = convolve2d(image, sobel_y, normalize=False)
+    # Use OpenCV's Sobel operator for gradient computation
+    # CV_64F gives us float64 output to handle negative values
+    gx = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3)
+    gy = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)
     
     # Compute gradient magnitude: G = sqrt(Gx² + Gy²)
-    gradient_magnitude = np.sqrt(gx.astype(np.float64)**2 + gy.astype(np.float64)**2)
+    gradient_magnitude = np.sqrt(gx**2 + gy**2)
     
     # Normalize to [0, 255] range
     if gradient_magnitude.max() > 0:
