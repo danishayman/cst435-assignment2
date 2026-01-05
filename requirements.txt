@@ -1,0 +1,16 @@
+# Parallel Image Processing Pipeline
+# CST435 Assignment 2 - Dependencies
+
+# Core image processing
+numpy>=1.21.0
+Pillow>=9.0.0
+
+# Dataset download
+kagglehub>=0.2.0
+
+# Note: multiprocessing and concurrent.futures are part of Python standard library
+# No additional parallel computing frameworks needed
+
+# Optional: for development and testing
+# pytest>=7.0.0
+# pytest-cov>=4.0.0
