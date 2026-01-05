@@ -56,6 +56,9 @@ def get_image_paths(input_dir: str, limit: Optional[int] = None) -> List[str]:
     # Walk through directory recursively
     for root, _, files in os.walk(input_path):
         for filename in files:
+            # Skip macOS resource fork files (start with "._")
+            if filename.startswith('._'):
+                continue
             ext = Path(filename).suffix.lower()
             if ext in SUPPORTED_EXTENSIONS:
                 full_path = os.path.join(root, filename)
