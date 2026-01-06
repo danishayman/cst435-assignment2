@@ -342,81 +342,81 @@ def print_summary_table(results: Dict[str, Any]) -> None:
     Args:
         results: Benchmark results from run_benchmark()
     """
-    # Box drawing characters
-    TL = "╔"  # Top left
-    TR = "╗"  # Top right
-    BL = "╚"  # Bottom left
-    BR = "╝"  # Bottom right
-    H = "═"   # Horizontal
-    V = "║"   # Vertical
-    LT = "╠"  # Left T
-    RT = "╣"  # Right T
-    TT = "╦"  # Top T
-    BT = "╩"  # Bottom T
-    CR = "╬"  # Cross
-    
     # Column widths
     col1, col2, col3, col4 = 15, 15, 15, 15
-    total_width = col1 + col2 + col3 + col4 + 5  # 5 for borders
+    total_width = col1 + col2 + col3 + col4 + 3  # 3 for inner separators
+    
+    # Helper functions for borders
+    def top_border():
+        return "+" + "-" * total_width + "+"
+    
+    def separator():
+        return "+" + "-" * total_width + "+"
+    
+    def table_header():
+        return "+" + "-" * col1 + "+" + "-" * col2 + "+" + "-" * col3 + "+" + "-" * col4 + "+"
+    
+    def row(c1, c2, c3, c4):
+        return "|" + c1.center(col1) + "|" + c2.center(col2) + "|" + c3.center(col3) + "|" + c4.center(col4) + "|"
     
     print()
-    print(TL + H*total_width + TR)
-    title = "BENCHMARK SUMMARY"
-    print(V + title.center(total_width) + V)
-    print(LT + H*total_width + RT)
+    print(top_border())
+    print("|" + "BENCHMARK SUMMARY".center(total_width) + "|")
+    print(separator())
     
     # Info section
-    print(V + f"  Timestamp: {results['timestamp'][:19]}".ljust(total_width) + V)
-    print(V + f"  Total images processed: {results['sequential']['total_images']}".ljust(total_width) + V)
-    print(V + f"  Sequential baseline time: {results['sequential']['total_time']:.4f} seconds".ljust(total_width) + V)
-    print(LT + H*total_width + RT)
+    print("|" + f"  Timestamp: {results['timestamp'][:19]}".ljust(total_width) + "|")
+    print("|" + f"  Total images processed: {results['sequential']['total_images']}".ljust(total_width) + "|")
+    print("|" + f"  Sequential baseline time: {results['sequential']['total_time']:.4f} seconds".ljust(total_width) + "|")
+    print(separator())
     
     # Multiprocessing header
-    mp_title = "MULTIPROCESSING RESULTS"
-    print(V + mp_title.center(total_width) + V)
-    print(LT + H*col1 + TT + H*col2 + TT + H*col3 + TT + H*col4 + RT)
-    print(V + "Processes".center(col1) + V + "Time (s)".center(col2) + V + "Speedup".center(col3) + V + "Efficiency".center(col4) + V)
-    print(LT + H*col1 + CR + H*col2 + CR + H*col3 + CR + H*col4 + RT)
+    print("|" + "MULTIPROCESSING RESULTS".center(total_width) + "|")
+    print(table_header())
+    print(row("Processes", "Time (s)", "Speedup", "Efficiency"))
+    print(table_header())
     
     for i, mp_data in enumerate(results['multiprocessing']):
         metrics = results['metrics']['multiprocessing'][i]
-        print(V + str(mp_data['num_processes']).center(col1) + V + 
-              f"{mp_data['total_time']:.4f}".center(col2) + V + 
-              f"{metrics['speedup']:.2f}x".center(col3) + V + 
-              f"{metrics['efficiency']*100:.2f}%".center(col4) + V)
+        print(row(
+            str(mp_data['num_processes']),
+            f"{mp_data['total_time']:.4f}",
+            f"{metrics['speedup']:.2f}x",
+            f"{metrics['efficiency']*100:.2f}%"
+        ))
     
-    print(LT + H*col1 + BT + H*col2 + BT + H*col3 + BT + H*col4 + RT)
+    print(table_header())
     
     # Futures header
-    fut_title = "CONCURRENT.FUTURES RESULTS (ThreadPoolExecutor)"
-    print(V + fut_title.center(total_width) + V)
-    print(LT + H*col1 + TT + H*col2 + TT + H*col3 + TT + H*col4 + RT)
-    print(V + "Workers".center(col1) + V + "Time (s)".center(col2) + V + "Speedup".center(col3) + V + "Efficiency".center(col4) + V)
-    print(LT + H*col1 + CR + H*col2 + CR + H*col3 + CR + H*col4 + RT)
+    print("|" + "CONCURRENT.FUTURES RESULTS (ThreadPoolExecutor)".center(total_width) + "|")
+    print(table_header())
+    print(row("Workers", "Time (s)", "Speedup", "Efficiency"))
+    print(table_header())
     
     for i, fut_data in enumerate(results['futures']):
         metrics = results['metrics']['futures'][i]
-        print(V + str(fut_data['max_workers']).center(col1) + V + 
-              f"{fut_data['total_time']:.4f}".center(col2) + V + 
-              f"{metrics['speedup']:.2f}x".center(col3) + V + 
-              f"{metrics['efficiency']*100:.2f}%".center(col4) + V)
+        print(row(
+            str(fut_data['max_workers']),
+            f"{fut_data['total_time']:.4f}",
+            f"{metrics['speedup']:.2f}x",
+            f"{metrics['efficiency']*100:.2f}%"
+        ))
     
-    print(LT + H*col1 + BT + H*col2 + BT + H*col3 + BT + H*col4 + RT)
+    print(table_header())
     
     # Parallel overhead section
-    overhead = calculate_parallel_overhead(results)
-    oh_title = "PARALLEL OVERHEAD (1 process vs sequential)"
-    print(V + oh_title.center(total_width) + V)
-    print(LT + H*total_width + RT)
+    print("|" + "PARALLEL OVERHEAD (1 process vs sequential)".center(total_width) + "|")
+    print(separator())
     
+    overhead = calculate_parallel_overhead(results)
     if overhead['multiprocessing_overhead'] is not None:
         mp_oh = f"  Multiprocessing: {overhead['multiprocessing_overhead']:>8.4f}s ({overhead['multiprocessing_overhead_percent']:>5.1f}%)"
-        print(V + mp_oh.ljust(total_width) + V)
+        print("|" + mp_oh.ljust(total_width) + "|")
     if overhead['futures_overhead'] is not None:
         fut_oh = f"  Futures:         {overhead['futures_overhead']:>8.4f}s ({overhead['futures_overhead_percent']:>5.1f}%)"
-        print(V + fut_oh.ljust(total_width) + V)
+        print("|" + fut_oh.ljust(total_width) + "|")
     
-    print(BL + H*total_width + BR)
+    print(top_border())
 
 
 def run_quick_benchmark(input_dir: str, output_dir: str = "benchmark_output",
