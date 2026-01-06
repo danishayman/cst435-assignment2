@@ -267,37 +267,12 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
         print(f"Average time per image: {avg_time:.4f} seconds")
         print(f"Unique workers used: {len(unique_workers)}")
         
-        # Print worker log with emoji formatting
-        print()
-        print("="*20 + " Method 1:  Concurrent Futures " + "="*20)
-        
-        # Show first 10 and last 5 results for brevity
-        display_results = results[:10] + (results[-5:] if len(results) > 15 else [])
-        shown_indices = list(range(min(10, len(results)))) + (list(range(len(results)-5, len(results))) if len(results) > 15 else [])
-        
-        for idx, r in zip(shown_indices, display_results):
-            pid = r.get('worker_pid', 'N/A')
-            tid = r.get('worker_tid', 'N/A')
-            core = r.get('cpu_core', -1)
-            core_str = str(core) if core >= 0 else 'N/A'
-            time_consumed = r['processing_time']
-            
-            print(f"🔄 [Thread] Data Chunk ID: {idx+1} ---> CPU Core ID: {core_str}")
-            print(f"   ℹ  Identity Info: PID:{pid} | TID:{tid}")
-            print(f"   ⏱  Time Consumed: {time_consumed:.4f}s")
-            print(f"   📊  Classification Result: {{'Processed': 1}}")
-            print()
-            
-            if idx == 9 and len(results) > 15:
-                print("   ...")
-                print()
-        
         # Analyze PID and Core distribution
+        print()
         unique_pids = set(r.get('worker_pid') for r in results if r.get('worker_pid'))
         unique_cores = set(r.get('cpu_core') for r in results if r.get('cpu_core', -1) >= 0)
         print(f"PID Analysis: All threads share the SAME PID = {list(unique_pids)[0] if unique_pids else 'N/A'}")
         print(f"CPU Cores used: {sorted(unique_cores) if unique_cores else 'N/A'}")
-        print(f"Note: Threads are constrained by Python GIL - limited true parallelism for CPU-bound tasks")
         
         # Report any errors
         errors = [r for r in results if not r['success']]
