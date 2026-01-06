@@ -241,30 +241,6 @@ def run_multiprocessing_pipeline(input_dir: str, output_dir: str,
         print(f"Average time per image: {avg_time:.4f} seconds")
         print(f"Unique workers used: {len(unique_workers)}")
         
-        # Analyze PID and Core distribution
-        print()
-        print("=" * 60)
-        print("PID Observation & Core Allocation Analysis")
-        print("=" * 60)
-        unique_pids = set(r.get('worker_pid') for r in results if r.get('worker_pid'))
-        unique_cores = set(r.get('cpu_core') for r in results if r.get('cpu_core', -1) >= 0)
-        print(f"PID Analysis: {len(unique_pids)} distinct PIDs = {sorted(unique_pids)}")
-        print(f"CPU Cores used: {sorted(unique_cores) if unique_cores else 'N/A'}")
-        print()
-        print("Explanation:")
-        print("-" * 40)
-        print("PID Observation:")
-        print("  - Each worker has a DIFFERENT Process ID (PID)")
-        print("  - This is because multiprocessing creates separate processes")
-        print("  - Each process has its own memory space and Python interpreter")
-        print()
-        print("Core Allocation:")
-        print("  - Each process can run on different CPU cores simultaneously")
-        print("  - Bypasses Python's Global Interpreter Lock (GIL)")
-        print("  - Achieves TRUE parallel execution for CPU-bound tasks")
-        print("  - Ideal for computationally intensive operations like image processing")
-        print("=" * 60)
-        
         # Report any errors
         errors = [r for r in results if not r['success']]
         if errors:
