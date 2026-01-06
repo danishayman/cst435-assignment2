@@ -337,60 +337,86 @@ def export_results_to_csv(results: Dict[str, Any], output_path: str) -> None:
 
 def print_summary_table(results: Dict[str, Any]) -> None:
     """
-    Print a formatted summary table of benchmark results.
+    Print a formatted summary table of benchmark results with nice borders.
     
     Args:
         results: Benchmark results from run_benchmark()
     """
-    print("\n" + "="*70)
-    print("BENCHMARK SUMMARY")
-    print("="*70)
+    # Box drawing characters
+    TL = "╔"  # Top left
+    TR = "╗"  # Top right
+    BL = "╚"  # Bottom left
+    BR = "╝"  # Bottom right
+    H = "═"   # Horizontal
+    V = "║"   # Vertical
+    LT = "╠"  # Left T
+    RT = "╣"  # Right T
+    TT = "╦"  # Top T
+    BT = "╩"  # Bottom T
+    CR = "╬"  # Cross
     
-    print(f"\nTimestamp: {results['timestamp']}")
-    print(f"Total images processed: {results['sequential']['total_images']}")
-    print(f"Sequential baseline time: {results['sequential']['total_time']:.4f} seconds")
+    # Column widths
+    col1, col2, col3, col4 = 15, 15, 15, 15
+    total_width = col1 + col2 + col3 + col4 + 5  # 5 for borders
     
-    # Multiprocessing table
-    print("\n" + "-"*70)
-    print("MULTIPROCESSING RESULTS")
-    print("-"*70)
-    print(f"{'Processes':<15} {'Time (s)':<15} {'Speedup':<15} {'Efficiency':<15}")
-    print("-"*70)
+    print()
+    print(TL + H*total_width + TR)
+    title = "BENCHMARK SUMMARY"
+    print(V + title.center(total_width) + V)
+    print(LT + H*total_width + RT)
+    
+    # Info section
+    print(V + f"  Timestamp: {results['timestamp'][:19]}".ljust(total_width) + V)
+    print(V + f"  Total images processed: {results['sequential']['total_images']}".ljust(total_width) + V)
+    print(V + f"  Sequential baseline time: {results['sequential']['total_time']:.4f} seconds".ljust(total_width) + V)
+    print(LT + H*total_width + RT)
+    
+    # Multiprocessing header
+    mp_title = "MULTIPROCESSING RESULTS"
+    print(V + mp_title.center(total_width) + V)
+    print(LT + H*col1 + TT + H*col2 + TT + H*col3 + TT + H*col4 + RT)
+    print(V + "Processes".center(col1) + V + "Time (s)".center(col2) + V + "Speedup".center(col3) + V + "Efficiency".center(col4) + V)
+    print(LT + H*col1 + CR + H*col2 + CR + H*col3 + CR + H*col4 + RT)
     
     for i, mp_data in enumerate(results['multiprocessing']):
         metrics = results['metrics']['multiprocessing'][i]
-        print(f"{mp_data['num_processes']:<15} "
-              f"{mp_data['total_time']:<15.4f} "
-              f"{metrics['speedup']:<15.2f} "
-              f"{metrics['efficiency']*100:<14.2f}%")
+        print(V + str(mp_data['num_processes']).center(col1) + V + 
+              f"{mp_data['total_time']:.4f}".center(col2) + V + 
+              f"{metrics['speedup']:.2f}x".center(col3) + V + 
+              f"{metrics['efficiency']*100:.2f}%".center(col4) + V)
     
-    # Futures table
-    print("\n" + "-"*70)
-    print("CONCURRENT.FUTURES RESULTS")
-    print("-"*70)
-    print(f"{'Workers':<15} {'Time (s)':<15} {'Speedup':<15} {'Efficiency':<15}")
-    print("-"*70)
+    print(LT + H*col1 + BT + H*col2 + BT + H*col3 + BT + H*col4 + RT)
+    
+    # Futures header
+    fut_title = "CONCURRENT.FUTURES RESULTS (ThreadPoolExecutor)"
+    print(V + fut_title.center(total_width) + V)
+    print(LT + H*col1 + TT + H*col2 + TT + H*col3 + TT + H*col4 + RT)
+    print(V + "Workers".center(col1) + V + "Time (s)".center(col2) + V + "Speedup".center(col3) + V + "Efficiency".center(col4) + V)
+    print(LT + H*col1 + CR + H*col2 + CR + H*col3 + CR + H*col4 + RT)
     
     for i, fut_data in enumerate(results['futures']):
         metrics = results['metrics']['futures'][i]
-        print(f"{fut_data['max_workers']:<15} "
-              f"{fut_data['total_time']:<15.4f} "
-              f"{metrics['speedup']:<15.2f} "
-              f"{metrics['efficiency']*100:<14.2f}%")
+        print(V + str(fut_data['max_workers']).center(col1) + V + 
+              f"{fut_data['total_time']:.4f}".center(col2) + V + 
+              f"{metrics['speedup']:.2f}x".center(col3) + V + 
+              f"{metrics['efficiency']*100:.2f}%".center(col4) + V)
     
-    # Parallel overhead
+    print(LT + H*col1 + BT + H*col2 + BT + H*col3 + BT + H*col4 + RT)
+    
+    # Parallel overhead section
     overhead = calculate_parallel_overhead(results)
-    print("\n" + "-"*70)
-    print("PARALLEL OVERHEAD (with 1 process vs sequential)")
-    print("-"*70)
-    if overhead['multiprocessing_overhead'] is not None:
-        print(f"Multiprocessing: {overhead['multiprocessing_overhead']:>8.4f}s "
-              f"({overhead['multiprocessing_overhead_percent']:>5.1f}%)")
-    if overhead['futures_overhead'] is not None:
-        print(f"Futures:         {overhead['futures_overhead']:>8.4f}s "
-              f"({overhead['futures_overhead_percent']:>5.1f}%)")
+    oh_title = "PARALLEL OVERHEAD (1 process vs sequential)"
+    print(V + oh_title.center(total_width) + V)
+    print(LT + H*total_width + RT)
     
-    print("\n" + "="*70)
+    if overhead['multiprocessing_overhead'] is not None:
+        mp_oh = f"  Multiprocessing: {overhead['multiprocessing_overhead']:>8.4f}s ({overhead['multiprocessing_overhead_percent']:>5.1f}%)"
+        print(V + mp_oh.ljust(total_width) + V)
+    if overhead['futures_overhead'] is not None:
+        fut_oh = f"  Futures:         {overhead['futures_overhead']:>8.4f}s ({overhead['futures_overhead_percent']:>5.1f}%)"
+        print(V + fut_oh.ljust(total_width) + V)
+    
+    print(BL + H*total_width + BR)
 
 
 def run_quick_benchmark(input_dir: str, output_dir: str = "benchmark_output",
