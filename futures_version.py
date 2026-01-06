@@ -15,9 +15,16 @@ Paradigm: High-level futures-based parallelism
 
 import time
 import threading
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict, Any, Optional
 import multiprocessing as mp
+
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
 
 from filters import apply_all_filters
 from utils import (
@@ -27,6 +34,17 @@ from utils import (
     get_output_path,
     ensure_directory
 )
+
+
+def _get_cpu_core_id() -> int:
+    """Get the current CPU core ID that this thread is running on."""
+    if PSUTIL_AVAILABLE:
+        try:
+            p = psutil.Process(os.getpid())
+            return p.cpu_num()
+        except (AttributeError, psutil.Error):
+            return -1
+    return -1
 
 
 # =============================================================================
@@ -53,14 +71,23 @@ def _process_image_worker(input_path: str, output_path: str,
             - error: Error message if failed
             - processing_time: Time taken in seconds
             - worker_tid: Thread ID of the worker
+            - worker_pid: Process ID (same for all threads)
+            - cpu_core: CPU core ID where the thread executed
     """
+    # Capture worker info at start
+    pid = os.getpid()
+    tid = threading.current_thread().ident
+    cpu_core = _get_cpu_core_id()
+    
     result = {
         'input_path': input_path,
         'output_path': output_path,
         'success': False,
         'error': None,
         'processing_time': 0.0,
-        'worker_tid': threading.current_thread().ident
+        'worker_tid': tid,
+        'worker_pid': pid,
+        'cpu_core': cpu_core
     }
     
     start_time = time.perf_counter()
@@ -228,6 +255,35 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
         print(f"Total time: {total_time:.4f} seconds")
         print(f"Average time per image: {avg_time:.4f} seconds")
         print(f"Unique workers used: {len(unique_workers)}")
+        
+        # Print worker log table showing PID, Thread ID, and CPU Core
+        print()
+        print("Worker Execution Log (Threading - same PID, different Thread IDs):")
+        print("-" * 80)
+        print(f"{'Image #':<10} {'PID':<12} {'Thread ID':<18} {'CPU Core':<10} {'Time (s)':<10}")
+        print("-" * 80)
+        
+        # Show first 10 and last 5 results for brevity
+        display_results = results[:10] + (results[-5:] if len(results) > 15 else [])
+        shown_indices = list(range(min(10, len(results)))) + (list(range(len(results)-5, len(results))) if len(results) > 15 else [])
+        
+        for idx, r in zip(shown_indices, display_results):
+            pid = r.get('worker_pid', 'N/A')
+            tid = r.get('worker_tid', 'N/A')
+            core = r.get('cpu_core', -1)
+            core_str = str(core) if core >= 0 else 'N/A'
+            print(f"{idx+1:<10} {pid:<12} {tid:<18} {core_str:<10} {r['processing_time']:.4f}")
+            if idx == 9 and len(results) > 15:
+                print(f"{'...':<10} {'...':<12} {'...':<18} {'...':<10} ...")
+        
+        print("-" * 80)
+        
+        # Analyze PID and Core distribution
+        unique_pids = set(r.get('worker_pid') for r in results if r.get('worker_pid'))
+        unique_cores = set(r.get('cpu_core') for r in results if r.get('cpu_core', -1) >= 0)
+        print(f"PID Analysis: All threads share the SAME PID = {list(unique_pids)[0] if unique_pids else 'N/A'}")
+        print(f"CPU Cores used: {sorted(unique_cores) if unique_cores else 'N/A'}")
+        print(f"Note: Threads are constrained by Python GIL - limited true parallelism for CPU-bound tasks")
         
         # Report any errors
         errors = [r for r in results if not r['success']]

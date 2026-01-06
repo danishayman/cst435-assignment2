@@ -5,6 +5,9 @@
 numpy>=1.21.0
 opencv-python>=4.5.0
 
+# System monitoring for CPU core tracking
+psutil>=5.9.0
+
 # Note: multiprocessing and concurrent.futures are part of Python standard library
 # No additional parallel computing frameworks needed
 
