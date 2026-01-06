@@ -224,20 +224,23 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
             # Print processing info for each image
             if verbose and result['success']:
                 pid = result.get('worker_pid', 'N/A')
+                tid = result.get('worker_tid', 'N/A')
                 core = result.get('cpu_core', -1)
                 core_str = str(core) if core >= 0 else '1'
-                filename = os.path.basename(result['input_path'])
-                # Clear line and print file info, then show progress bar on same line
+                
+                # Print thread details
+                print(f"[Thread] Data Chunk ID: {completed} ---> CPU Core ID: {core_str}")
+                print(f"   Identity Info: PID:{pid} | TID:{tid}")
+                
+                # Progress bar
                 percentage = int((completed / total_images) * 100)
-                bar_length = 30
+                bar_length = 40
                 filled_length = int(bar_length * completed / total_images)
                 bar = '█' * filled_length + '░' * (bar_length - filled_length)
-                sys.stdout.write(f"\r[PID: {pid}] [Core: {core_str}] Processing: {filename:<30} | {percentage:3d}%|{bar}|")
-                sys.stdout.flush()
+                print(f"Futures ThreadPool ({max_workers} threads): {percentage:3d}%|{bar}| {completed}/{total_images}")
+                print()
         
-        # Print newline after progress bar completes
-        if verbose:
-            print()  # Move to next line after progress bar
+        # No need for extra newline since we're printing normally now
     
     total_time = time.perf_counter() - start_time
     
