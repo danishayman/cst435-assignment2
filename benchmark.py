@@ -354,29 +354,29 @@ def print_summary_table(results: Dict[str, Any]) -> None:
     print("\n" + "-"*70)
     print("MULTIPROCESSING RESULTS")
     print("-"*70)
-    print(f"{'Processes':<12} {'Time (s)':<12} {'Speedup':<12} {'Efficiency':<12}")
-    print("-"*48)
+    print(f"{'Processes':<15} {'Time (s)':<15} {'Speedup':<15} {'Efficiency':<15}")
+    print("-"*70)
     
     for i, mp_data in enumerate(results['multiprocessing']):
         metrics = results['metrics']['multiprocessing'][i]
-        print(f"{mp_data['num_processes']:<12} "
-              f"{mp_data['total_time']:<12.4f} "
-              f"{metrics['speedup']:<12.2f} "
-              f"{metrics['efficiency']:<12.2%}")
+        print(f"{mp_data['num_processes']:<15} "
+              f"{mp_data['total_time']:<15.4f} "
+              f"{metrics['speedup']:<15.2f} "
+              f"{metrics['efficiency']*100:<14.2f}%")
     
     # Futures table
     print("\n" + "-"*70)
     print("CONCURRENT.FUTURES RESULTS")
     print("-"*70)
-    print(f"{'Workers':<12} {'Time (s)':<12} {'Speedup':<12} {'Efficiency':<12}")
-    print("-"*48)
+    print(f"{'Workers':<15} {'Time (s)':<15} {'Speedup':<15} {'Efficiency':<15}")
+    print("-"*70)
     
     for i, fut_data in enumerate(results['futures']):
         metrics = results['metrics']['futures'][i]
-        print(f"{fut_data['max_workers']:<12} "
-              f"{fut_data['total_time']:<12.4f} "
-              f"{metrics['speedup']:.2f}x".ljust(12) + " "
-              f"{metrics['efficiency']:<12.2%}")
+        print(f"{fut_data['max_workers']:<15} "
+              f"{fut_data['total_time']:<15.4f} "
+              f"{metrics['speedup']:<15.2f} "
+              f"{metrics['efficiency']*100:<14.2f}%")
     
     # Parallel overhead
     overhead = calculate_parallel_overhead(results)
@@ -384,11 +384,11 @@ def print_summary_table(results: Dict[str, Any]) -> None:
     print("PARALLEL OVERHEAD (with 1 process vs sequential)")
     print("-"*70)
     if overhead['multiprocessing_overhead'] is not None:
-        print(f"Multiprocessing: {overhead['multiprocessing_overhead']:.4f}s "
-              f"({overhead['multiprocessing_overhead_percent']:.1f}%)")
+        print(f"Multiprocessing: {overhead['multiprocessing_overhead']:>8.4f}s "
+              f"({overhead['multiprocessing_overhead_percent']:>5.1f}%)")
     if overhead['futures_overhead'] is not None:
-        print(f"Futures:         {overhead['futures_overhead']:.4f}s "
-              f"({overhead['futures_overhead_percent']:.1f}%)")
+        print(f"Futures:         {overhead['futures_overhead']:>8.4f}s "
+              f"({overhead['futures_overhead_percent']:>5.1f}%)")
     
     print("\n" + "="*70)
 
