@@ -256,12 +256,9 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
         print(f"Average time per image: {avg_time:.4f} seconds")
         print(f"Unique workers used: {len(unique_workers)}")
         
-        # Print worker log table showing PID, Thread ID, and CPU Core
+        # Print worker log with emoji formatting
         print()
-        print("Worker Execution Log (Threading - same PID, different Thread IDs):")
-        print("-" * 80)
-        print(f"{'Image #':<10} {'PID':<12} {'Thread ID':<18} {'CPU Core':<10} {'Time (s)':<10}")
-        print("-" * 80)
+        print("="*20 + " Method 1:  Concurrent Futures " + "="*20)
         
         # Show first 10 and last 5 results for brevity
         display_results = results[:10] + (results[-5:] if len(results) > 15 else [])
@@ -272,11 +269,17 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
             tid = r.get('worker_tid', 'N/A')
             core = r.get('cpu_core', -1)
             core_str = str(core) if core >= 0 else 'N/A'
-            print(f"{idx+1:<10} {pid:<12} {tid:<18} {core_str:<10} {r['processing_time']:.4f}")
+            time_consumed = r['processing_time']
+            
+            print(f"🔄 [Thread] Data Chunk ID: {idx+1} ---> CPU Core ID: {core_str}")
+            print(f"   ℹ  Identity Info: PID:{pid} | TID:{tid}")
+            print(f"   ⏱  Time Consumed: {time_consumed:.4f}s")
+            print(f"   📊  Classification Result: {{'Processed': 1}}")
+            print()
+            
             if idx == 9 and len(results) > 15:
-                print(f"{'...':<10} {'...':<12} {'...':<18} {'...':<10} ...")
-        
-        print("-" * 80)
+                print("   ...")
+                print()
         
         # Analyze PID and Core distribution
         unique_pids = set(r.get('worker_pid') for r in results if r.get('worker_pid'))
