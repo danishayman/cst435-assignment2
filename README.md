@@ -198,11 +198,11 @@ sudo apt-get update && sudo apt-get install -y libgl1-mesa-glx libglib2.0-0
 ### Step 4: Run Benchmark on VM
 
 ```bash
-# Run demo with all 2000 images
+# Run demo with all 1000 images
 python run_demo.py
 
 # Or run benchmark with custom options
-python benchmark.py data/food-101-subset --limit 2000 -p 1 2 4 8
+python benchmark.py data/food-101-subset --limit 1000 -p 1 2 4 8
 ```
 
 ### Step 5: Download Results

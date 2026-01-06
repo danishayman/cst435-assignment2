@@ -20,12 +20,12 @@ from utils import save_image, ensure_directory, get_image_paths
 from benchmark import run_benchmark, print_summary_table, export_results_to_csv
 
 
-def run_demo(num_images: int = 2000, cleanup: bool = True):
+def run_demo(num_images: int = 1000, cleanup: bool = True):
     """
     Run a complete demo of the pipeline using images from data folder.
     
     Args:
-        num_images: Number of images to process from data folder (default: 2000)
+        num_images: Number of images to process from data folder (default: 1000)
         cleanup: Whether to cleanup output data after completion
     """
     print("="*70)
@@ -90,8 +90,8 @@ if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(description='Run pipeline demo')
-    parser.add_argument('--images', '-n', type=int, default=2000,
-                        help='Number of images to process (default: 2000)')
+    parser.add_argument('--images', '-n', type=int, default=1000,
+                        help='Number of images to process (default: 1000)')
     parser.add_argument('--no-cleanup', action='store_true',
                         help='Keep output after completion')
     

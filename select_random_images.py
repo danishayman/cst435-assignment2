@@ -1,5 +1,5 @@
 """
-Script to select random 2000 images from food-101 folder and copy to data folder.
+Script to select random 1000 images from food-101 folder and copy to data folder.
 """
 
 import os
@@ -19,14 +19,14 @@ def get_all_images(source_dir):
     
     return images
 
-def select_and_copy_images(source_dir, dest_dir, num_images=2000, seed=42):
+def select_and_copy_images(source_dir, dest_dir, num_images=1000, seed=42):
     """
     Select random images from source directory and copy to destination.
     
     Args:
         source_dir: Path to the food-101/images folder
         dest_dir: Path to the destination data folder
-        num_images: Number of random images to select (default: 2000)
+        num_images: Number of random images to select (default: 1000)
         seed: Random seed for reproducibility (default: 42)
     """
     # Set random seed for reproducibility
@@ -115,7 +115,7 @@ def main():
     select_and_copy_images(
         source_dir=str(source_dir),
         dest_dir=str(dest_dir),
-        num_images=2000,
+        num_images=1000,
         seed=42  # Set seed for reproducibility
     )
 
