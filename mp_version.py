@@ -15,6 +15,7 @@ Paradigm: Low-level multiprocessing with explicit Pool management
 
 import multiprocessing as mp
 import os
+import sys
 import time
 from typing import List, Dict, Any, Optional
 
@@ -190,21 +191,19 @@ def run_multiprocessing_pipeline(input_dir: str, output_dir: str,
             results.append(result)
             completed = len(results)
             
-            # Print processing info in the desired format
-            if verbose and result['success']:
-                pid = result.get('worker_pid', 'N/A')
-                core = result.get('cpu_core', -1)
-                core_str = str(core) if core >= 0 else '1'
-                filename = os.path.basename(result['input_path'])
-                print(f"[PID: {pid}] [Core: {core_str}] Processing: {filename}")
-            
-            # Progress bar update
-            if verbose and (completed % 10 == 0 or completed == total_images):
+            # Progress bar update (in-place using carriage return)
+            if verbose:
                 percentage = int((completed / total_images) * 100)
-                bar_length = 50
+                bar_length = 40
                 filled_length = int(bar_length * completed / total_images)
                 bar = '█' * filled_length + '░' * (bar_length - filled_length)
-                print(f"Multiprocessing Pool ({num_processes} processes): {percentage}%|{bar}|")
+                # Use \r to overwrite the same line
+                sys.stdout.write(f"\rMultiprocessing Pool ({num_processes} processes): {percentage:3d}%|{bar}| {completed}/{total_images}")
+                sys.stdout.flush()
+        
+        # Print newline after progress bar completes
+        if verbose:
+            print()  # Move to next line after progress bar
     
     total_time = time.perf_counter() - start_time
     
