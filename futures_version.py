@@ -221,14 +221,18 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
                     'worker_tid': None
                 })
             
-            # Progress bar update (in-place using carriage return)
-            if verbose:
+            # Print processing info for each image
+            if verbose and result['success']:
+                pid = result.get('worker_pid', 'N/A')
+                core = result.get('cpu_core', -1)
+                core_str = str(core) if core >= 0 else '1'
+                filename = os.path.basename(result['input_path'])
+                # Clear line and print file info, then show progress bar on same line
                 percentage = int((completed / total_images) * 100)
-                bar_length = 40
+                bar_length = 30
                 filled_length = int(bar_length * completed / total_images)
                 bar = '█' * filled_length + '░' * (bar_length - filled_length)
-                # Use \r to overwrite the same line
-                sys.stdout.write(f"\rFutures ThreadPool ({max_workers} threads): {percentage:3d}%|{bar}| {completed}/{total_images}")
+                sys.stdout.write(f"\r[PID: {pid}] [Core: {core_str}] Processing: {filename:<30} | {percentage:3d}%|{bar}|")
                 sys.stdout.flush()
         
         # Print newline after progress bar completes
