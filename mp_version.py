@@ -183,10 +183,28 @@ def run_multiprocessing_pipeline(input_dir: str, output_dir: str,
     
     # Create pool and process images in parallel
     # Using Pool as a context manager ensures proper cleanup
+    results = []
     with mp.Pool(processes=num_processes) as pool:
-        # map() blocks until all tasks are complete
-        # It preserves order of results
-        results = pool.map(_process_image_worker, tasks)
+        # Use imap_unordered for real-time progress reporting
+        for result in pool.imap_unordered(_process_image_worker, tasks):
+            results.append(result)
+            completed = len(results)
+            
+            # Print processing info in the desired format
+            if verbose and result['success']:
+                pid = result.get('worker_pid', 'N/A')
+                core = result.get('cpu_core', -1)
+                core_str = str(core) if core >= 0 else '1'
+                filename = os.path.basename(result['input_path'])
+                print(f"[PID: {pid}] [Core: {core_str}] Processing: {filename}")
+            
+            # Progress bar update
+            if verbose and (completed % 10 == 0 or completed == total_images):
+                percentage = int((completed / total_images) * 100)
+                bar_length = 50
+                filled_length = int(bar_length * completed / total_images)
+                bar = '█' * filled_length + '░' * (bar_length - filled_length)
+                print(f"Multiprocessing Pool ({num_processes} processes): {percentage}%|{bar}|")
     
     total_time = time.perf_counter() - start_time
     

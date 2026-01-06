@@ -220,10 +220,21 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
                     'worker_tid': None
                 })
             
-            # Progress update
+            # Print processing info in the desired format
+            if verbose and result['success']:
+                pid = result.get('worker_pid', 'N/A')
+                core = result.get('cpu_core', -1)
+                core_str = str(core) if core >= 0 else '1'  # Default to 1 if unavailable
+                filename = os.path.basename(result['input_path'])
+                print(f"[PID: {pid}] [Core: {core_str}] Processing: {filename}")
+            
+            # Progress bar update
             if verbose and (completed % 10 == 0 or completed == total_images):
-                elapsed = time.perf_counter() - start_time
-                print(f"  Progress: {completed}/{total_images} images ({elapsed:.2f}s elapsed)")
+                percentage = int((completed / total_images) * 100)
+                bar_length = 50
+                filled_length = int(bar_length * completed / total_images)
+                bar = '█' * filled_length + '░' * (bar_length - filled_length)
+                print(f"Futures ThreadPool ({max_workers} threads): {percentage}%|{bar}|")
     
     total_time = time.perf_counter() - start_time
     
