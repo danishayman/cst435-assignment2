@@ -2,19 +2,20 @@
 futures_version.py - concurrent.futures Implementation
 
 This module implements the parallel image processing pipeline using
-Python's concurrent.futures module with ProcessPoolExecutor.
+Python's concurrent.futures module with ThreadPoolExecutor.
 
 Key Features:
-    - Uses ProcessPoolExecutor for high-level abstraction
+    - Uses ThreadPoolExecutor for high-level abstraction
     - Future-based task management
     - Context manager pattern for resource cleanup
-    - Process-based parallelism (bypasses GIL)
+    - Thread-based parallelism (subject to GIL for CPU-bound tasks)
 
 Paradigm: High-level futures-based parallelism
 """
 
 import time
-from concurrent.futures import ProcessPoolExecutor, as_completed
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict, Any, Optional
 import multiprocessing as mp
 
@@ -37,8 +38,7 @@ def _process_image_worker(input_path: str, output_path: str,
     """
     Worker function that processes a single image.
     
-    This function is designed to be called via ProcessPoolExecutor.submit().
-    It must be defined at module level to be picklable.
+    This function is designed to be called via ThreadPoolExecutor.submit().
     
     Args:
         input_path: Path to input image
@@ -52,7 +52,7 @@ def _process_image_worker(input_path: str, output_path: str,
             - success: Boolean indicating success
             - error: Error message if failed
             - processing_time: Time taken in seconds
-            - worker_pid: Process ID of the worker
+            - worker_tid: Thread ID of the worker
     """
     result = {
         'input_path': input_path,
@@ -60,7 +60,7 @@ def _process_image_worker(input_path: str, output_path: str,
         'success': False,
         'error': None,
         'processing_time': 0.0,
-        'worker_pid': mp.current_process().pid
+        'worker_tid': threading.current_thread().ident
     }
     
     start_time = time.perf_counter()
@@ -96,7 +96,7 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
                          brightness_value: int = 30,
                          verbose: bool = True) -> Dict[str, Any]:
     """
-    Run the image processing pipeline using concurrent.futures.ProcessPoolExecutor.
+    Run the image processing pipeline using concurrent.futures.ThreadPoolExecutor.
     
     This implementation uses Python's concurrent.futures module, which provides
     a higher-level interface than raw multiprocessing. It uses Future objects
@@ -105,7 +105,7 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
     Args:
         input_dir: Directory containing input images
         output_dir: Directory for processed images
-        max_workers: Maximum number of worker processes (default: CPU count)
+        max_workers: Maximum number of worker threads (default: CPU count)
         limit: Maximum number of images to process (None for all)
         brightness_value: Brightness adjustment value (default: 30)
         verbose: Print progress information (default: True)
@@ -117,7 +117,7 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
             - failed: Number of failed processings
             - total_time: Total wall-clock time in seconds
             - avg_time_per_image: Average time per image
-            - max_workers: Number of worker processes used
+            - max_workers: Number of worker threads used
             - results: List of individual result dictionaries
     
     Example:
@@ -141,7 +141,7 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
     total_images = len(image_paths)
     
     if verbose:
-        print(f"Concurrent.Futures Pipeline (ProcessPoolExecutor)")
+        print(f"Concurrent.Futures Pipeline (ThreadPoolExecutor)")
         print(f"=================================================")
         print(f"Input directory: {input_dir}")
         print(f"Output directory: {output_dir}")
@@ -160,8 +160,8 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
     
     results = []
     
-    # Use ProcessPoolExecutor with context manager
-    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+    # Use ThreadPoolExecutor with context manager
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         # Submit all tasks and get Future objects
         # Using submit() allows for more control than map()
         future_to_task = {
@@ -190,7 +190,7 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
                     'success': False,
                     'error': f"Future exception: {str(e)}",
                     'processing_time': 0.0,
-                    'worker_pid': None
+                    'worker_tid': None
                 })
             
             # Progress update
@@ -205,8 +205,8 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
     failed = sum(1 for r in results if not r['success'])
     avg_time = total_time / total_images if total_images > 0 else 0
     
-    # Collect unique worker PIDs
-    unique_workers = set(r['worker_pid'] for r in results if r['worker_pid'] is not None)
+    # Collect unique worker thread IDs
+    unique_workers = set(r['worker_tid'] for r in results if r['worker_tid'] is not None)
     
     summary = {
         'total_images': total_images,
@@ -285,7 +285,7 @@ def run_futures_pipeline_with_map(input_dir: str, output_dir: str,
     
     start_time = time.perf_counter()
     
-    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         # map() returns results in order, as an iterator
         results = list(executor.map(
             _process_image_worker,
@@ -299,7 +299,7 @@ def run_futures_pipeline_with_map(input_dir: str, output_dir: str,
     successful = sum(1 for r in results if r['success'])
     failed = sum(1 for r in results if not r['success'])
     avg_time = total_time / total_images if total_images > 0 else 0
-    unique_workers = set(r['worker_pid'] for r in results if r.get('worker_pid'))
+    unique_workers = set(r['worker_tid'] for r in results if r.get('worker_tid'))
     
     summary = {
         'total_images': total_images,
@@ -377,7 +377,7 @@ if __name__ == "__main__":
     from utils import save_image, ensure_directory
     import shutil
     
-    print("Testing concurrent.futures pipeline...")
+    print("Testing concurrent.futures pipeline (ThreadPoolExecutor)...")
     print(f"Available CPUs: {mp.cpu_count()}")
     
     # Create test directory structure
