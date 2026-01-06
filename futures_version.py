@@ -269,10 +269,28 @@ def run_futures_pipeline(input_dir: str, output_dir: str,
         
         # Analyze PID and Core distribution
         print()
+        print("=" * 60)
+        print("PID Observation & Core Allocation Analysis")
+        print("=" * 60)
         unique_pids = set(r.get('worker_pid') for r in results if r.get('worker_pid'))
         unique_cores = set(r.get('cpu_core') for r in results if r.get('cpu_core', -1) >= 0)
         print(f"PID Analysis: All threads share the SAME PID = {list(unique_pids)[0] if unique_pids else 'N/A'}")
         print(f"CPU Cores used: {sorted(unique_cores) if unique_cores else 'N/A'}")
+        print()
+        print("Explanation:")
+        print("-" * 40)
+        print("PID Observation:")
+        print("  - All threads share the SAME Process ID (PID)")
+        print("  - This is because ThreadPoolExecutor uses threads, not processes")
+        print("  - Threads exist within a single process's memory space")
+        print()
+        print("Core Allocation:")
+        print("  - Threads may run on different CPU cores")
+        print("  - However, Python's Global Interpreter Lock (GIL) limits")
+        print("    true parallel execution for CPU-bound tasks")
+        print("  - Only one thread can execute Python bytecode at a time")
+        print("  - Best suited for I/O-bound tasks (file operations, network)")
+        print("=" * 60)
         
         # Report any errors
         errors = [r for r in results if not r['success']]
